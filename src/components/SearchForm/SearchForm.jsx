@@ -7,12 +7,12 @@ export default class SearchForm extends Component {
   };
 
   handleInputOnChange = e => {
-    this.setState({ [e.currentTarget.name]: e.currentTarget.value.trim() });
+    this.setState({ [e.currentTarget.name]: e.currentTarget.value });
   };
 
   handleFormOnSubmit = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state.input);
+    this.props.onSubmit(this.state.input.trim());
   };
 
   render() {
