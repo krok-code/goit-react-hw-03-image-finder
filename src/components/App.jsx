@@ -49,7 +49,7 @@ export class App extends Component {
     this.setState({ notification: { show: false } });
   };
 
-  render(){
+  render() {
     const { notification } = this.state;
     return (
       <div className={styles.app}>
