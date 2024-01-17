@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import styles from './App.module.css';
 import { fetchImages, IMAGES_PER_PAGE } from 'api/fetch-data';
 import SearchForm from './SearchForm/SearchForm';
@@ -14,7 +14,7 @@ const NOTIFICATION_TYPE = {
   info: 'info',
 };
 
-export class App extends Component {
+export class App extends PureComponent {
   state = {
     images: [],
     query: '',
@@ -26,6 +26,36 @@ export class App extends Component {
     },
     isLoadMore: false,
   };
+
+  componentDidUpdate(_, prevState) {
+    const { query } = this.state;
+
+    if (prevState.query !== query) {
+      this.setState({ page: 1 });
+
+      fetchImages(query)
+        .then(data => {
+          console.log('data :>>', data);
+
+          if (!data.totalHits) {
+            this.showNotification(
+              NOTIFICATION_TYPE.info,
+              'Sorry, there are no images matching your search query. Please try again.'
+            );
+            return;
+          }
+
+          this.setState({ images: data.hits, isLoadMore: false });
+
+          if (data.totalHits > IMAGES_PER_PAGE) {
+            this.displayLoadMoreButton(true);
+          }
+        })
+        .catch(error => {
+          this.handleFetchError(error);
+        });
+    }
+  }
 
   displayLoadMoreButton = isShow => {
     this.setState({ isLoadMore: isShow });
@@ -61,53 +91,33 @@ export class App extends Component {
       );
       return;
     }
-    this.setState({ query }, () => {
-      const { query, page } = this.state;
-      fetchImages(query, page)
-        .then(data => {
-          console.log('data :>>', data);
-
-          if (!data.totalHits) {
-            this.showNotification(
-              NOTIFICATION_TYPE.info,
-              'Sorry, there are no images matching your search query. Please try again.'
-            );
-            return;
-          }
-
-          this.setState({ images: data.hits, isLoadMore: false });
-
-          if (data.totalHits > IMAGES_PER_PAGE) {
-            this.displayLoadMoreButton(true);
-          }
-        })
-        .catch(error => {
-          this.handleFetchError(error);
-        });
-    });
+    this.setState({ query });
   };
 
   handleOnClickLoadMoreButton = () => {
     this.setState(
-        prevState => ({ page: prevState.page + 1 }),
-        () => {
-          const { query, page } = this.state;
-          fetchImages(query, page)
-            .then(data => {
-              this.setState(prevState => ({
-                images: [...prevState.images, ...data.hits],
-              }));
+      prevState => ({ page: prevState.page + 1 }),
+      () => {
+        const { query, page } = this.state;
+        fetchImages(query, page)
+          .then(data => {
+            this.setState(prevState => ({
+              images: [...prevState.images, ...data.hits],
+            }));
 
-              if (IMAGES_PER_PAGE * page >= data.totalHits) {
-                this.displayLoadMoreButton(false);
-              }
-            })
-            .catch(error => {
-              this.handleFetchError(error);
-            });
-        }
-      );
-  }
+            if (IMAGES_PER_PAGE * page >= data.totalHits) {
+              this.displayLoadMoreButton(
+                NOTIFICATION_TYPE.info,
+                "We're sorry, but you've reached the end of search results."
+              );
+            }
+          })
+          .catch(error => {
+            this.handleFetchError(error);
+          });
+      }
+    );
+  };
 
   render() {
     const { images, notification, isLoadMore } = this.state;
@@ -124,10 +134,11 @@ export class App extends Component {
             {notification.message}
           </Notification>
         )}
-        <ImageGallery images={omages} />
+        <ImageGallery images={images} />
         {isLoadMore && (
           <Button onClick={this.handleOnClickLoadMoreButton}>Load More</Button>
         )}
       </div>
     );
   }
+}
