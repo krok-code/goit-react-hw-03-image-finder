@@ -26,11 +26,15 @@ class Modal extends React.Component {
     }
   };
 
+  handleClickOnModal = event => {
+    event.stopPropagation();
+  };
+
   render() {
     const { url, onClose } = this.props;
     return createPortal(
       <div className={styles.overlay} onClick={onClose}>
-        <div className={`${styles.modal}`}>
+        <div className={`${styles.modal}`} onClick={this.handleClickOnModal}>
           <img src={url} alt="" />
         </div>
         <div className="position-absolute top-0 end-0 p-3">
