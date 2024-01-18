@@ -6,6 +6,7 @@ import SearchBar from './SearchBar/SearchBar';
 import Notification from './Notification';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
+import { Loader } from './Loader/Loader';
 
 const NOTIFICATION_TYPE = {
   succes: 'succes',
@@ -25,13 +26,14 @@ export class App extends PureComponent {
       show: false,
     },
     isLoadMore: false,
+    isLoader: false,
   };
 
   componentDidUpdate(_, prevState) {
     const { query } = this.state;
 
     if (prevState.query !== query) {
-      this.setState({ page: 1 });
+      this.setState({ page: 1, isLoader: true });
 
       fetchImages(query)
         .then(data => {
@@ -53,6 +55,9 @@ export class App extends PureComponent {
         })
         .catch(error => {
           this.handleFetchError(error);
+        })
+        .finally(() => {
+          this.setState({ isLoader: false });
         });
     }
   }
@@ -96,7 +101,7 @@ export class App extends PureComponent {
 
   handleOnClickLoadMoreButton = () => {
     this.setState(
-      prevState => ({ page: prevState.page + 1 }),
+      prevState => ({ page: prevState.page + 1, isLoader: true }),
       () => {
         const { query, page } = this.state;
         fetchImages(query, page)
@@ -114,13 +119,16 @@ export class App extends PureComponent {
           })
           .catch(error => {
             this.handleFetchError(error);
+          })
+          .finally(() => {
+            this.setState({ isLoader: false });
           });
       }
     );
   };
 
   render() {
-    const { images, notification, isLoadMore } = this.state;
+    const { images, notification, isLoadMore, isLoader } = this.state;
     return (
       <div className={styles.app}>
         <SearchBar>
@@ -135,6 +143,7 @@ export class App extends PureComponent {
           </Notification>
         )}
         <ImageGallery images={images} />
+        {isLoader && <Loader />}
         {isLoadMore && (
           <Button onClick={this.handleOnClickLoadMoreButton}>Load More</Button>
         )}
