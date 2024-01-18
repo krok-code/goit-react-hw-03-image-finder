@@ -1,12 +1,15 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import styles from './SearchForm.module.css';
 
 export default class SearchForm extends Component {
+  static propTypes = { onSubmit: PropTypes.func.isRequired };
+
   state = {
     input: '',
   };
 
-  handleInputOnChange = e => {
+  handleInputOnCnange = e => {
     this.setState({ [e.currentTarget.name]: e.currentTarget.value });
   };
 

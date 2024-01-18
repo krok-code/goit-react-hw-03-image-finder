@@ -24,9 +24,6 @@ export async function fetchImages(query, page = 1) {
 
   try {
     const response = await axios(config);
-    if (response.status !== 200) {
-      throw new Error('Error fetching data');
-    }
     return response.data;
   } catch (error) {
     throw error;

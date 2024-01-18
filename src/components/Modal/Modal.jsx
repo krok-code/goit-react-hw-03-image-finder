@@ -9,10 +9,12 @@ const modalRootRef = document.querySelector('#modal-root');
 class Modal extends React.Component {
   static propTypes = {
     url: PropTypes.string.isRequired,
+    onClose: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
     document.body.style.position = 'fixed';
+    window.addEventListener('keydown', this.handlerKeyDownEsc);
   }
 
   componentWillUnmount() {
