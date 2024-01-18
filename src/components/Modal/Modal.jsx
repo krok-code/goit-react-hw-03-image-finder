@@ -17,12 +17,19 @@ class Modal extends React.Component {
 
   componentWillUnmount() {
     document.body.style.position = '';
+    window.removeEventListener('keydown', this.handlerKeyDownEsc);
   }
+
+  handlerKeyDownEsc = e => {
+    if (e.key === 'Escape') {
+      this.props.onClose();
+    }
+  };
 
   render() {
     const { url, onClose } = this.props;
     return createPortal(
-      <div className={styles.overlay}>
+      <div className={styles.overlay} onClick={onClose}>
         <div className={`${styles.modal}`}>
           <img src={url} alt="" />
         </div>
